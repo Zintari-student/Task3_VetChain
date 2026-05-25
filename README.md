@@ -13,10 +13,6 @@ python3.12 -m venv .venv
 
 ## Klucze demo
 
-| Rola | Klucz |
-|------|-------|
-| Weterynarz | `0xWET_9921_KILW` |
-| Hodowca | `0xHOD_8821_ZKWP` |
-| Schronisko | `0xSCHR_1102_GOV` |
-| Właściciel | `0xOWN_9912_USER` |
-| Kupujący | `0xBUY_5532_VIEW` |
+Przy pierwszym uruchomieniu generowane deterministycznie w `.demo_keys/*.priv` (gitignored). Każdy plik zawiera 64-znakowy hex klucza prywatnego secp256k1. Login = paste hex → app derywuje adres → szuka aktora na łańcuchu → ustawia sesję podpisującą transakcje.
+
+Demo buttony w UI pastują hex z pliku. Dostępne role: weterynarz, hodowca, schronisko, właściciel, kupujący.

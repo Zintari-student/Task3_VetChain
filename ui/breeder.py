@@ -4,7 +4,7 @@ from tkinter import messagebox
 
 import customtkinter as ctk
 
-import vetchain_db as db
+import vetchain_chain as db
 from vetchain_crypto import VetChainCrypto
 
 from .base import BaseScreen

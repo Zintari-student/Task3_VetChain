@@ -2,7 +2,7 @@
 
 import customtkinter as ctk
 
-import vetchain_db as db
+import vetchain_chain as db
 from ui import VetChainApp
 
 
@@ -13,7 +13,7 @@ def main() -> None:
     except Exception as e:
         print(f"⚠️ Nie znaleziono pliku motywu vetchain_theme.json: {e}")
 
-    db.init_db()
+    db.init_chain()
     app = VetChainApp()
     app.mainloop()
 

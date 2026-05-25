@@ -2,6 +2,8 @@
 
 import customtkinter as ctk
 
+import vetchain_chain as db
+
 from .breeder import ScreenHodowca, ScreenHodowcaDodaj, ScreenHodowcaProfil
 from .buyer import ScreenKupujacy
 from .login import ScreenLogin
@@ -62,6 +64,12 @@ class VetChainApp(ctk.CTk):
         self.show_frame("ScreenLogin")
 
     def show_frame(self, page_name: str) -> None:
+        if page_name == "ScreenLogin":
+            db.clear_session()
+            self.current_actor = None
+            self.current_animal_chip = None
+            self.pending_reveal_id = None
+
         if self.current_frame is not None:
             self.current_frame.destroy()
 

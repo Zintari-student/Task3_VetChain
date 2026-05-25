@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 import customtkinter as ctk
 
-import vetchain_db as db
+import vetchain_chain as db
 
 from .base import BaseScreen
 

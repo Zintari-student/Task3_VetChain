@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 vetchain.db
 vetchain.db-journal
+
+.demo_keys/
+vetchain_chain.jsonl
