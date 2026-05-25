@@ -221,10 +221,17 @@ class ScreenWeterynarzDodaj(BaseScreen):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        # Nagłówek - przycisk powrotu w lewym górnym rogu panelu
-        ctk.CTkButton(self.panel, text="← Anuluj",width=80, fg_color="#333333", hover_color="#1a1a1a", 
-                      command=lambda: controller.show_frame("ScreenWeterynarzMain")).grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        header = ctk.CTkFrame(self.panel, fg_color="transparent")
+        header.grid(row=0, column=0, sticky="ew", padx=20, pady=10)
+        header.grid_columnconfigure(1, weight=1)
+        
+        ctk.CTkButton(header, text="← Anuluj", width=80, fg_color="#333333", hover_color="#1a1a1a",
+              command=lambda: controller.show_frame("ScreenWeterynarzMain")).grid(row=0, column=0, padx=0, pady=10, sticky="w")
 
+        ctk.CTkLabel(header, text="● Rola: Lekarz Weterynarii (KILW)", 
+             font=ctk.CTkFont(weight="bold")).grid(row=0, column=1, padx=0, pady=10, sticky="e")
+
+        # Nagłówek
         ctk.CTkLabel(self.panel, text="Inicjowanie Nowej Wizyty w Blockchain", font=ctk.CTkFont(size=20, weight="bold")).grid(row=0, column=0, pady=20)
 
         # Kontener na formularz - wyśrodkowany
@@ -250,12 +257,12 @@ class ScreenWeterynarzDodaj(BaseScreen):
         actions_frame.grid(row=5, column=0, pady=30)
 
         # Przycisk A
-        btn_full = ctk.CTkButton(actions_frame, text="🔒 Podpisz i Wyślij\n(Pełny Commit + Reveal)", fg_color="#2ecc71", hover_color="#27ae60", width=200, height=50, font=ctk.CTkFont(weight="bold"),
+        btn_full = ctk.CTkButton(actions_frame, text="🔒 Podpisz i Wyślij\n(Pełny Commit + Reveal)", fg_color="#333333", hover_color="#1a1a1a", width=200, height=50, font=ctk.CTkFont(weight="bold"),
                                  command=self.action_full_submit)
         btn_full.grid(row=0, column=0, padx=10)
 
         # Przycisk B
-        btn_later = ctk.CTkButton(actions_frame, text="⏳ Tylko zarejestruj czas\n(Commit, Hash później)", fg_color="#f1c40f", text_color="black", hover_color="#f39c12", width=200, height=50, font=ctk.CTkFont(weight="bold"),
+        btn_later = ctk.CTkButton(actions_frame, text="⏳ Tylko zarejestruj czas\n(Commit, Hash później)", width=200, height=50, font=ctk.CTkFont(weight="bold"),
                                   command=self.action_later_submit)
         btn_later.grid(row=0, column=1, padx=10)
 
@@ -330,31 +337,36 @@ class ScreenHodowca(BaseScreen):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        # Nagłówek
+        # 1. Naglowek
         header = ctk.CTkFrame(self.panel, fg_color="transparent")
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=10)
+        header.grid_columnconfigure(1, weight=1)
         
-        ctk.CTkButton(header, text="🔒 Wyloguj", width=80, fg_color="#333333", hover_color="#1a1a1a", 
-                      command=lambda: controller.show_frame("ScreenLogin")).pack(side="left")
-        ctk.CTkLabel(header, text="● Rola: Hodowca zarejestrowany (ZKwP / PKR)", 
-                      text_color="#2ecc71", font=ctk.CTkFont(weight="bold")).pack(side="right")
+        ctk.CTkButton(header, text="🔒 Wyloguj", width=80, fg_color="#333333", hover_color="#1a1a1a",
+              command=lambda: controller.show_frame("ScreenLogin")).grid(row=0, column=0, padx=0, pady=10, sticky="w")
 
-        ctk.CTkLabel(self.panel, text="Panel Zarządzania Hodowlą", font=ctk.CTkFont(size=22, weight="bold")).grid(row=1, column=0, pady=15)
+        ctk.CTkLabel(header, text="● Rola: Hodowca zarejestrowany (ZKwP / PKR)",
+             font=ctk.CTkFont(weight="bold")).grid(row=0, column=1, padx=0, pady=10, sticky="e")
 
-        # PRZYCISK DODAJ - kolor spójny z weterynarzem (#333333)
-        btn_dodaj = ctk.CTkButton(self.panel, text="➕   DODAJ NOWE ZWIERZĘ / MIOT", fg_color="#333333", hover_color="#1a1a1a", 
+        # 2. Tytuł panelu
+        ctk.CTkLabel(self.panel, text="Panel Zarządzania Hodowlą", 
+                     font=ctk.CTkFont(size=22, weight="bold")).grid(row=1, column=0, pady=15)
+
+        # 3. Przycisk dodawania
+        btn_dodaj = ctk.CTkButton(self.panel, text="➕   DODAJ NOWE ZWIERZĘ / MIOT",
                                   width=400, height=50, font=ctk.CTkFont(size=14, weight="bold"),
                                   command=lambda: controller.show_frame("ScreenHodowcaDodaj"))
         btn_dodaj.grid(row=2, column=0, pady=20)
 
-        # Kontener tabeli (#b4beb4)
-        table_container = ctk.CTkFrame(self.panel, fg_color="#b4beb4")
+        # 4. Kontener tabeli
+        table_container = ctk.CTkFrame(self.panel, fg_color="transparent")
         table_container.grid(row=3, column=0, sticky="nsew", padx=40, pady=10)
         self.panel.grid_rowconfigure(3, weight=1)
 
-        ctk.CTkLabel(table_container, text="📋 ZWIERZĘTA W HODOWLI:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=15, pady=(10, 5))
+        ctk.CTkLabel(table_container, text="📋 ZWIERZĘTA W HODOWLI:", 
+                     font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=15, pady=(10, 5))
 
-        # Tabelka (#a3aea3)
+        # 5. Tabelka
         table_frame = ctk.CTkScrollableFrame(table_container, fg_color="#a3aea3")
         table_frame.pack(fill="both", expand=True, padx=15, pady=15)
 
@@ -364,13 +376,13 @@ class ScreenHodowca(BaseScreen):
         self.create_animal_row(table_frame, "Imię: Ares    |  Płeć: Samiec  |  Wiek: 1 rok   |  Czip: ISO-967000008888888", "ScreenHodowcaProfilAres")
 
     def create_animal_row(self, parent, text, target_profile_frame):
-        row = ctk.CTkFrame(parent, fg_color="#2c3e50")
+        row = ctk.CTkFrame(parent)
         row.pack(fill="x", pady=4, padx=5)
         
         ctk.CTkLabel(row, text=text, font=ctk.CTkFont(size=12)).pack(side="left", padx=15, pady=8)
         
-        btn = ctk.CTkButton(row, text="Profil 🐕", width=100, height=26, fg_color="#34495e", hover_color="#1f538d", 
-                             font=ctk.CTkFont(size=11, weight="bold"),
+        btn = ctk.CTkButton(row, text="Profil 🐕", width=100, height=26, 
+                             font=ctk.CTkFont(size=12, weight="bold"),
                              command=lambda: self.controller.show_frame(target_profile_frame))
         btn.pack(side="right", padx=10)
 
@@ -409,8 +421,7 @@ class ScreenHodowcaDodaj(BaseScreen):
         info_chip.grid(row=3, column=0, pady=10)
 
         # Przycisk zapisu
-        btn_save = ctk.CTkButton(form_frame, text="💾 Zapisz w Lokalnym Węźle Hodowli", fg_color="#2ecc71", 
-                                 hover_color="#27ae60", width=400, height=45, font=ctk.CTkFont(weight="bold"),
+        btn_save = ctk.CTkButton(form_frame, text="💾 Zapisz w Lokalnym Węźle Hodowli", width=400, height=45, font=ctk.CTkFont(weight="bold"),
                                  command=self.action_save_animal)
         btn_save.grid(row=4, column=0, pady=15)
 
