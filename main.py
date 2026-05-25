@@ -1,6 +1,9 @@
+import base64
+
 import customtkinter as ctk
 from tkinter import messagebox
 
+from vetchain_crypto import VetChainCrypto
 
 ctk.set_default_color_theme("sage-teal_theme.json")
 
@@ -789,6 +792,22 @@ class ScreenSchroniskoProfilSonia(BaseScreen):
 class ScreenWlasciciel(BaseScreen):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        
+        self.btn_key.configure(command=self.action_generate_zkp_key)
+
+    def action_generate_zkp_key(self):
+        mock_pet_key = b"12345678901234567890123456789012"
+        
+        token_for_buyer = base64.b64encode(mock_pet_key).decode('utf-8')
+        
+        self.clipboard_clear()
+        self.clipboard_append(token_for_buyer)
+        
+        messagebox.showinfo(
+            "Zarządzanie Prywatnością (KILW)", 
+            f"Sukces!\n\nWygenerowano tymczasowy klucz deszyfrujący dla kupującego.\n"
+            f"Klucz skopiowano do schowka:\n{token_for_buyer[:15]}..."
+        )
 
         # Nagłówek statusu i wylogowania
         header = ctk.CTkFrame(self.panel, fg_color="transparent")
@@ -811,7 +830,7 @@ class ScreenWlasciciel(BaseScreen):
         # Przycisk generowania klucza
         btn_key = ctk.CTkButton(self.panel, text="🔑 Generuj tymczasowy klucz dostępu dla kupującego (Ważny 24h)", 
                                 fg_color="#e67e22", hover_color="#d35400", width=400, height=45,
-                                command=lambda: messagebox.showinfo("Zarządzanie Prywatnością", "Wygenerowano jednorazowy klucz ZKP."))
+                                command=self.action_generate_zkp_key)
         btn_key.grid(row=2, column=0, pady=10)
 
         # Sekcja historii
@@ -843,7 +862,22 @@ class ScreenKupujacy(BaseScreen):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        # Nagłówek statusu i wylogowania
+        # Przykładowe dane z Blockchain (Ledgera) do odszyfrowania
+        self.blockchain_mock_data = [
+            {
+                "med": "24.05.2026 | Szczepienie wścieklizna aktywne.\nAutoryzacja weterynarza: Pomyślna.",
+                "fin": "Koszt: 120 PLN"
+            },
+            {
+                "med": "10.04.2026 | Odroczenie szczepień (Wskazania medyczne).\nPowód: Leczenie gastryczne.",
+                "fin": "Koszt: 150 PLN"
+            },
+            {
+                "med": "15.03.2026 | Wykonano badanie RTG stawów.\nDowód kryptograficzny: ZGODNY.",
+                "fin": "Koszt: 450 PLN"
+            }
+        ]
+
         header = ctk.CTkFrame(self.panel, fg_color="transparent")
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=10)
         
@@ -852,30 +886,40 @@ class ScreenKupujacy(BaseScreen):
         ctk.CTkLabel(header, text="● Rola: Weryfikator / Kupujący (ZKP View)", 
                       text_color="#e67e22", font=ctk.CTkFont(weight="bold")).pack(side="right")
 
-        # Karta zdrowia (Podgląd)
         profile = ctk.CTkFrame(self.panel, fg_color="#2c3e50")
         profile.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
         
         ctk.CTkLabel(profile, text="🐕 KARTA ZDROWIA: Reksio (Owczarek)", 
                       font=ctk.CTkFont(size=20, weight="bold")).pack(pady=5)
-        ctk.CTkLabel(profile, text="ID mikroczipu: ISO-967000001234567 | Dane finansowe: [ZABLOKOWANE]", 
+        ctk.CTkLabel(profile, text="ID mikroczipu: ISO-967000001234567 | Dane finansowe: [ZABLOKOWANE DLA ZKP]", 
                       text_color="#e74c3c", font=ctk.CTkFont(size=12, weight="bold")).pack(pady=5)
 
-        # Sekcja historii
         ctk.CTkLabel(self.panel, text="Zweryfikowana Historia Medyczna (Dane publiczne ZKP):", 
                       font=ctk.CTkFont(size=14, weight="bold")).grid(row=2, column=0, pady=(10, 5))
 
-        timeline = ctk.CTkScrollableFrame(self.panel, fg_color="#a3aea3")
-        timeline.grid(row=3, column=0, sticky="nsew", padx=20, pady=10)
+        self.timeline = ctk.CTkScrollableFrame(self.panel, fg_color="#a3aea3")
+        self.timeline.grid(row=3, column=0, sticky="nsew", padx=20, pady=10)
         self.panel.grid_rowconfigure(3, weight=1)
 
-        # Wiersze historii
-        self.add_timeline_item(timeline, "24.05.2026 | Szczepienie wścieklizna aktywne.\nAutoryzacja weterynarza: Pomyślna.", "🔒 ZWERYFIKOWANO", "#2ecc71")
-        self.add_timeline_item(timeline, "10.04.2026 | Odroczenie szczepień (Wskazania medyczne).\nPowód: Leczenie gastryczne.", "⚠️ WYJĄTEK OK", "#e67e22")
-        self.add_timeline_item(timeline, "15.03.2026 | Wykonano badanie RTG stawów.\nDowód kryptograficzny: ZGODNY.", "✓ SPÓJNY HASH", "#3498db")
+        self.decrypt_and_render_timeline()
+
+    def decrypt_and_render_timeline(self):
+        entered_key_str = self.controller.current_frame.entry_key.get().strip() if hasattr(self.controller, 'current_frame') else ""
+        
+        secret_key = b"12345678901234567890123456789012" 
+        
+        for item in self.blockchain_mock_data:
+            encrypted = VetChainCrypto.encrypt_visit_data(secret_key, item["med"], item["fin"])
+            
+            decrypted_med = VetChainCrypto.decrypt_section(secret_key, encrypted["med_data"])
+            
+            wrong_key = b"wrong_key_32_bytes_long_bad_bad"
+            decrypted_fin = VetChainCrypto.decrypt_section(wrong_key, encrypted["fin_data"])
+            
+            display_text = f"{decrypted_med}\nFinanse: {decrypted_fin}"
+            self.add_timeline_item(self.timeline, display_text, "🔒 ZWERYFIKOWANO", "#2ecc71")
 
     def add_timeline_item(self, parent, text, status, color):
-        # Wewnątrz ScrollableFrame nadal używamy pack
         item = ctk.CTkFrame(parent, fg_color="#34495e")
         item.pack(fill="x", pady=3, padx=5)
         
@@ -942,5 +986,12 @@ class VetChainApp(ctk.CTk):
 
 # Uruchomienie aplikacji
 if __name__ == "__main__":
+    ctk.set_appearance_mode("Light") 
+    
+    try:
+        ctk.set_default_color_theme("vetchain_theme.json")
+    except Exception as e:
+        print(f"⚠️ Nie znaleziono pliku motywu vetchain_theme.json: {e}")
+
     app = VetChainApp()
     app.mainloop()
